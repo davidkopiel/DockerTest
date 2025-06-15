@@ -25,36 +25,47 @@ pipeline {
     }
 
     stages {
-        stage('Verify Trigger') {
-            steps {
-                script {
-                    if (env.TRIGGER_KEY != 'synchronize' && env.TRIGGER_KEY != 'opened') {
-                        error("Aborting: Not a relevant pull request event: ${env.TRIGGER_KEY}")
-                    }
+
+        stage('Scan Pull Request in Docker') {
+            agent {
+                docker {
+                    image 'python:3.11'
+                    args '-u root'
                 }
             }
-        }
-
-        stage('Download Frogbot') {
             steps {
+                echo "🔍 Start Scan Pull Request in Docker"
+
                 sh '''
-                    curl -fL https://releases.jfrog.io/artifactory/frogbot/v2/2.9.2/getFrogbot.sh -o getFrogbot.sh
-                    chmod +x getFrogbot.sh
-                    ./getFrogbot.sh
-                '''
-            }
-        }
+                    echo "📂 Current directory: $(pwd)"
+                    echo "🧪 Checking if .git directory exists..."
+                    ls -la
 
-        stage('Scan Pull Request') {
-            steps {
-                script {
-                    docker.image('python:3.10').inside {
-                        sh '''
-                            pip install pipenv
-                            ./frogbot scan-pull-request
-                        '''
+                    echo "📥 Installing dependencies..."
+                    apt-get update && apt-get install -y curl git
+
+                    echo "⬇️ Downloading Frogbot..."
+                    curl -fL https://releases.jfrog.io/artifactory/frogbot/v2/2.9.2/getFrogbot.sh -o getFrogbot.sh
+
+                    echo "🔐 Making script executable..."
+                    chmod +x getFrogbot.sh
+
+                    echo "🚀 Running Frogbot setup script..."
+                    ./getFrogbot.sh
+
+                    echo "📁 Repo state after download:"
+                    ls -la
+
+                    echo "📦 Running Frogbot scan..."
+                    ./frogbot scan-pull-request || {
+                        echo '❌ Frogbot failed. Dumping debug info:'
+                        ls -la
+                        cat frogbot.log || true
+                        exit 1
                     }
-                }
+
+                    echo "✅ Scan completed"
+                '''
             }
         }
     }
