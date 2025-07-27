@@ -1,7 +1,7 @@
 name: "PR Frogbot Security Scan"
 
 on:
-  pull_request_target: 
+  pull_request: 
     types: [opened, synchronize]
 
 permissions:
@@ -9,14 +9,18 @@ permissions:
   contents: write
   security-events: write
 
+
 jobs:
-  frogbot-scan:
+  scan-pull-request:
     runs-on: ubuntu-latest
+    # A pull request needs to be approved, before Frogbot scans it. Any GitHub user who is associated with the
+    # "frogbot" GitHub environment can approve the pull request to be scanned.
+    # Read more here (Install Frogbot Using GitHub Actions): https://github.com/jfrog/frogbot/blob/master/docs/install-github.md
+    environment: frogbot
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v2
         with:
-          fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - uses: jfrog/frogbot@v2
         env:
