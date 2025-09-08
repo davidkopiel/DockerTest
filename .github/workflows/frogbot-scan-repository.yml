@@ -16,6 +16,9 @@ jobs:
       - uses: jfrog/frogbot@v2
         with:
           version: 2.26.0
+          
+      - name: Check Frogbot CLI version
+        run: jf --version
         env:
           # [Mandatory]
           # JFrog platform URL
