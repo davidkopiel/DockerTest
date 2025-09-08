@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: jfrog/frogbot@v2
         with:
-          version: 2.26.0
+          version: 2.6.0
 
         env:
           # [Mandatory]
@@ -43,5 +43,3 @@ jobs:
         #   oidc-provider-name: ""
 
                   
-      - name: Check Frogbot CLI version
-        run: jf --version
