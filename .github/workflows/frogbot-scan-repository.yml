@@ -16,9 +16,7 @@ jobs:
       - uses: jfrog/frogbot@v2
         with:
           version: 2.26.0
-          
-      - name: Check Frogbot CLI version
-        run: jf --version
+
         env:
           # [Mandatory]
           # JFrog platform URL
@@ -43,3 +41,7 @@ jobs:
         # Insert to oidc-provider-name the 'Provider Name' defined in the OIDC integration configured in the JPD
         # with:
         #   oidc-provider-name: ""
+
+                  
+      - name: Check Frogbot CLI version
+        run: jf --version
